@@ -1,0 +1,69 @@
+/* Overlay to darken the background */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent black */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000; /* Ensure it's above other content */
+}
+
+/* Modal content box */
+.modal-content {
+  background-color: white;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+  max-width: 500px;
+  width: 100%;
+}
+
+/* Styling form elements */
+.modal-content h2 {
+  margin-top: 0;
+}
+
+.modal-content form div {
+  margin-bottom: 15px;
+}
+
+.modal-content form label {
+  display: block;
+  margin-bottom: 5px;
+}
+
+.modal-content form input[type="text"],
+.modal-content form input[type="color"] {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  font-size: 14px;
+}
+
+.modal-content button {
+  padding: 10px 15px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.modal-content button[type="submit"] {
+  background-color: #007bff;
+  color: white;
+}
+
+.modal-content button[type="button"] {
+  background-color: #f44336;
+  color: white;
+}
+
+.modal-content button[type="button"]:last-child {
+  background-color: gray;
+  color: white;
+}

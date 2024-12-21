@@ -9,3 +9,11 @@ Can:
   - clear all classes from quarter
 - switch quarters
 - everything should be saved to local storage (so when you refresh, it should all still be there!)
+- see course schedule
+
+Todo:
+
+- share screenshots of calendar
+- add unit count / unit count totaling
+- fix times displayed in schedule to not be 24-hour
+- simple web scraping to slightly reduce manual labor (might scrap this)

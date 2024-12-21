@@ -15,6 +15,4 @@ Can:
 
 Todo:
 
-- add unit count / unit count totaling
-- fix times displayed in schedule to not be 24-hour
 - simple web scraping to slightly reduce manual labor (might scrap this)

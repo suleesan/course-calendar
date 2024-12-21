@@ -42,6 +42,7 @@ const ClassForm = ({ onAddClass }) => {
     startTime: "",
     endTime: "",
     color: "#0000ff",
+    units: "",
   });
 
   const handleCheckboxChange = (day) => {
@@ -62,6 +63,7 @@ const ClassForm = ({ onAddClass }) => {
       startTime: "",
       endTime: "",
       color: "#0000ff",
+      units: "",
     });
   };
 
@@ -90,18 +92,39 @@ const ClassForm = ({ onAddClass }) => {
             />
           </div>
 
-          <div>
-            <strong style={{ marginRight: "10px" }}>Select Days:</strong>
-            {["M", "T", "W", "Th", "F"].map((day) => (
-              <label key={day}>
-                <input
-                  type="checkbox"
-                  checked={formData.days.includes(day)}
-                  onChange={() => handleCheckboxChange(day)}
-                />
-                {day}
-              </label>
-            ))}
+          <div style={{ display: "flex", alignItems: "center", gap: "20px" }}>
+            <div>
+              <strong style={{ marginRight: "4px" }}>Days:</strong>
+              {["M", "T", "W", "Th", "F"].map((day) => (
+                <label key={day}>
+                  <input
+                    type="checkbox"
+                    checked={formData.days.includes(day)}
+                    onChange={() => handleCheckboxChange(day)}
+                  />
+                  {day}
+                </label>
+              ))}
+            </div>
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "row",
+                alignItems: "center",
+                gap: "4px",
+              }}
+            >
+              <strong>Units: </strong>
+              <input
+                type="text"
+                placeholder="Units"
+                value={formData.units}
+                className="input"
+                onChange={(e) =>
+                  setFormData({ ...formData, units: e.target.value })
+                }
+              />
+            </div>
           </div>
           <div className="time-container">
             <strong>Time: </strong>

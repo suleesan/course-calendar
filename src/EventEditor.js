@@ -22,6 +22,7 @@ const EventEditor = ({ event, onUpdate, onDelete, onClose }) => {
     startTime: event.startTime,
     endTime: event.endTime,
     color: event.color,
+    units: event.units || "",
   });
 
   useEffect(() => {
@@ -31,11 +32,21 @@ const EventEditor = ({ event, onUpdate, onDelete, onClose }) => {
       startTime: event.startTime,
       endTime: event.endTime,
       color: event.color,
+      units: event.units || "",
     });
   }, [event]);
 
   const handleColorSelect = (color) => {
     setFormData((prevData) => ({ ...prevData, color }));
+  };
+
+  const handleCheckboxChange = (day) => {
+    setFormData((prevData) => {
+      const newDays = prevData.days.includes(day)
+        ? prevData.days.filter((d) => d !== day)
+        : [...prevData.days, day];
+      return { ...prevData, days: newDays };
+    });
   };
 
   const handleSubmit = (e) => {
@@ -47,7 +58,7 @@ const EventEditor = ({ event, onUpdate, onDelete, onClose }) => {
   return (
     <div className="modal-overlay">
       <div className="modal-content">
-        <h2>Edit Event</h2>
+        <h2>Edit Class</h2>
         <form
           onSubmit={handleSubmit}
           style={{ display: "flex", flexDirection: "column", gap: "20px" }}
@@ -62,6 +73,7 @@ const EventEditor = ({ event, onUpdate, onDelete, onClose }) => {
               }
             />
           </div>
+
           <div>
             <strong>Class Color:</strong>
             <div className="color-palette">
@@ -76,12 +88,10 @@ const EventEditor = ({ event, onUpdate, onDelete, onClose }) => {
                 />
               ))}
             </div>
-
             <div>
               <strong>Custom color: </strong>
               <input
                 type="color"
-                label="Custom"
                 value={formData.color}
                 onChange={(e) => handleColorSelect(e.target.value)}
                 style={{
@@ -92,18 +102,35 @@ const EventEditor = ({ event, onUpdate, onDelete, onClose }) => {
               />
             </div>
           </div>
+
           <div className="content">
             <strong>Days:</strong>
+            {["M", "T", "W", "Th", "F"].map((day) => (
+              <label key={day} style={{ marginRight: "10px" }}>
+                <input
+                  type="checkbox"
+                  checked={formData.days.includes(day)}
+                  onChange={() => handleCheckboxChange(day)}
+                />
+                {day}
+              </label>
+            ))}
+          </div>
+          <div className="content">
+            <strong>Units:</strong>
             <input
-              type="text"
-              value={formData.days}
+              type="number"
+              min="0"
+              className
+              placeholder="Units"
+              value={formData.units}
               onChange={(e) =>
-                setFormData({ ...formData, days: e.target.value })
+                setFormData({ ...formData, units: e.target.value })
               }
             />
           </div>
           <div className="content">
-            <strong>Start Time: </strong>
+            <strong>Start Time:</strong>
             <input
               type="time"
               value={formData.startTime}
@@ -112,8 +139,10 @@ const EventEditor = ({ event, onUpdate, onDelete, onClose }) => {
               }
             />
           </div>
+
+          {/* End Time */}
           <div className="content">
-            <strong>End Time: </strong>
+            <strong>End Time:</strong>
             <input
               type="time"
               value={formData.endTime}
@@ -122,14 +151,15 @@ const EventEditor = ({ event, onUpdate, onDelete, onClose }) => {
               }
             />
           </div>
+
           <div style={{ marginTop: "20px" }}>
-            <button type="submit">Update Event</button>
+            <button type="submit">Update Class</button>
             <button
               type="button"
               onClick={() => onDelete(event.title)}
               style={{ marginLeft: "10px" }}
             >
-              Delete Event
+              Delete Class
             </button>
             <button
               type="button"

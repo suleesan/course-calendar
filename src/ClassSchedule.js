@@ -1,28 +1,29 @@
 import React from "react";
-import { format } from "date-fns";
-import html2canvas from "html2canvas";
+import ShareCalendarButton from "./ShareCalendar";
+import { FiEdit2, FiHome } from "react-icons/fi";
 
-const ClassSchedule = ({ formDataList, onEventClick, clearQuarter }) => {
-  const handleScreenshot = () => {
-    const scheduleElement = document.querySelector("#schedule-container");
-    const calendarElement = document.querySelector("#calendar-container");
-
-    const container = document.createElement("div");
-    container.style.position = "absolute";
-    container.style.left = "-9999px";
-    container.appendChild(scheduleElement.cloneNode(true));
-    container.appendChild(calendarElement.cloneNode(true));
-    document.body.appendChild(container);
-
-    html2canvas(container).then((canvas) => {
-      const link = document.createElement("a");
-      link.download = "schedule-calendar.png";
-      link.href = canvas.toDataURL();
-      link.click();
-
-      document.body.removeChild(container);
-    });
+const ClassSchedule = ({
+  formDataList,
+  onEventClick,
+  clearQuarter,
+  dataByQuarter,
+  isSharedView,
+  goToHome,
+}) => {
+  const formatTo12Hour = (time) => {
+    const [hours, minutes] = time.split(":").map(Number);
+    const ampm = hours >= 12 ? "PM" : "AM";
+    const formattedHours = hours % 12 || 12;
+    return {
+      formattedTime: `${formattedHours}:${minutes.toString().padStart(2, "0")}`,
+      ampm,
+    };
   };
+
+  const totalUnits = formDataList.reduce((sum, formData) => {
+    const units = parseInt(formData.units) || 0;
+    return sum + units;
+  }, 0);
 
   return (
     <div id="schedule-container" style={{ padding: "20px" }}>
@@ -34,15 +35,9 @@ const ClassSchedule = ({ formDataList, onEventClick, clearQuarter }) => {
           marginBottom: "20px",
         }}
       >
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "row",
-            gap: "20px",
-          }}
-        >
+        <div style={{ display: "flex", gap: "20px" }}>
           <header style={{ fontSize: "24px", fontWeight: "bold" }}>
-            Schedule
+            Schedule ({totalUnits})
           </header>
           <button
             onClick={clearQuarter}
@@ -55,21 +50,27 @@ const ClassSchedule = ({ formDataList, onEventClick, clearQuarter }) => {
               cursor: "pointer",
             }}
           >
-            Clear All Classes
+            Clear Classes
           </button>
-          {/* <button
-            onClick={handleScreenshot}
-            style={{
-              backgroundColor: "#28a745",
-              color: "white",
-              border: "none",
-              padding: "8px 16px",
-              borderRadius: "4px",
-              cursor: "pointer",
-            }}
-          >
-            Save Screenshot
-          </button> */}
+          {isSharedView ? (
+            <button
+              onClick={goToHome}
+              style={{
+                backgroundColor: "#007bff",
+                color: "white",
+                border: "none",
+                padding: "8px 16px",
+                borderRadius: "4px",
+                cursor: "pointer",
+                display: "flex",
+                alignItems: "center",
+              }}
+            >
+              Home <FiHome style={{ marginLeft: "5px" }} />
+            </button>
+          ) : (
+            <ShareCalendarButton dataByQuarter={dataByQuarter} />
+          )}
         </div>
       </div>
       <div
@@ -79,25 +80,41 @@ const ClassSchedule = ({ formDataList, onEventClick, clearQuarter }) => {
           gap: "10px",
         }}
       >
-        {formDataList.map((formData, index) => (
-          <div
-            key={index}
-            style={{
-              backgroundColor: formData.color,
-              borderRadius: "5px",
-              padding: "10px",
-            }}
-          >
+        {formDataList.map((formData, index) => {
+          const start = formatTo12Hour(formData.startTime);
+          const end = formatTo12Hour(formData.endTime);
+
+          return (
             <div
-              onClick={() => onEventClick(formData)}
-              style={{ cursor: "pointer" }}
+              key={index}
+              style={{
+                backgroundColor: formData.color,
+                borderRadius: "6px",
+                padding: "12px 24px 12px 12px",
+              }}
             >
-              <strong>{formData.title} </strong>
-              <span>{formData.days}: </span>
-              {formData.startTime} - {formData.endTime}
+              <div
+                onClick={() => onEventClick(formData)}
+                style={{
+                  cursor: "pointer",
+                  position: "relative",
+                }}
+              >
+                <strong>
+                  {formData.title} ({formData.units}){" "}
+                </strong>
+                <span>{formData.days}: </span>
+                {start.formattedTime}{" "}
+                {start.ampm === end.ampm
+                  ? `- ${end.formattedTime} ${end.ampm}`
+                  : `${start.ampm} - ${end.formattedTime} ${end.ampm}`}
+                <FiEdit2
+                  style={{ position: "absolute", top: "-8px", right: "-20px" }}
+                />
+              </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );

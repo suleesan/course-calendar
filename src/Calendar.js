@@ -85,7 +85,7 @@ const Calendar = ({ events }) => {
                             height: event.height,
                             padding: "5px",
                             boxSizing: "border-box",
-                            borderRadius: "5px",
+                            borderRadius: "6px",
                             display: "flex",
                             alignItems: "center",
                             justifyContent: "center",

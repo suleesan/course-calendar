@@ -4,14 +4,14 @@ Inspired to create this because I used to manually plan out quarters by drawing 
 
 Can:
 
-- add class to calendar for a quarter
+- add class to the calendar for each quarter
   - also update/delete classes
-  - clear all classes from quarter
-- switch quarters
+  - clear all classes from a quarter
+- switch between quarters
 - everything should be saved to local storage (so when you refresh, it should all still be there!)
-- see course schedule
-- share calendar with a link! (to get back to ur own calendar, just clear the id)
-  - see my calendar [here](https://course-calendar.vercel.app/?id=5ddb9557-6598-4512-bb12-841de10018dc)!
+- see course schedule with unit counts
+- share calendar with a link! (and go back to yours with the home button)
+  - see my calendar [here](https://course-calendar.vercel.app/?id=df856d13-5769-4869-af5f-807484548d91)!
 
 Todo:
 

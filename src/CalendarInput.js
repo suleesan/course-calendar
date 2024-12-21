@@ -55,7 +55,6 @@ const ClassForm = ({ onAddClass }) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log(e);
     onAddClass({ ...formData, id: Date.now() });
     setFormData({
       title: "",
@@ -70,17 +69,27 @@ const ClassForm = ({ onAddClass }) => {
     <form onSubmit={handleSubmit}>
       <div className="form-container">
         <div className="input-container">
-          <strong>Class Name: </strong>
-          <input
-            type="text"
-            placeholder="Class Name"
-            value={formData.title}
-            onChange={(e) =>
-              setFormData({ ...formData, title: e.target.value })
-            }
-            className="input"
-            required
-          />
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "row",
+              alignItems: "center",
+              gap: "10px",
+            }}
+          >
+            <strong>Class: </strong>
+            <input
+              type="text"
+              placeholder="Class Name"
+              value={formData.title}
+              onChange={(e) =>
+                setFormData({ ...formData, title: e.target.value })
+              }
+              className="input"
+              required
+            />
+          </div>
+
           <div>
             <strong style={{ marginRight: "10px" }}>Select Days:</strong>
             {["M", "T", "W", "Th", "F"].map((day) => (
@@ -95,6 +104,7 @@ const ClassForm = ({ onAddClass }) => {
             ))}
           </div>
           <div className="time-container">
+            <strong>Time: </strong>
             <input
               type="time"
               value={formData.startTime}

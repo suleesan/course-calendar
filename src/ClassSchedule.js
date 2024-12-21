@@ -2,7 +2,7 @@ import React from "react";
 import { format } from "date-fns";
 import html2canvas from "html2canvas";
 
-const ClassSchedule = ({ formDataList, onEventClick }) => {
+const ClassSchedule = ({ formDataList, onEventClick, clearQuarter }) => {
   const handleScreenshot = () => {
     const scheduleElement = document.querySelector("#schedule-container");
     const calendarElement = document.querySelector("#calendar-container");
@@ -34,16 +34,18 @@ const ClassSchedule = ({ formDataList, onEventClick }) => {
           marginBottom: "20px",
         }}
       >
-        <div style={{ display: "flex", justifyContent: "row", gap: "20px" }}>
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "row",
+            gap: "20px",
+          }}
+        >
           <header style={{ fontSize: "24px", fontWeight: "bold" }}>
             Schedule
           </header>
           <button
-            onClick={() => {
-              localStorage.removeItem("formDataList");
-              localStorage.removeItem("events");
-              window.location.reload();
-            }}
+            onClick={clearQuarter}
             style={{
               backgroundColor: "#dc3545",
               color: "white",
@@ -55,7 +57,7 @@ const ClassSchedule = ({ formDataList, onEventClick }) => {
           >
             Clear All Classes
           </button>
-          <button
+          {/* <button
             onClick={handleScreenshot}
             style={{
               backgroundColor: "#28a745",
@@ -67,29 +69,36 @@ const ClassSchedule = ({ formDataList, onEventClick }) => {
             }}
           >
             Save Screenshot
-          </button>
+          </button> */}
         </div>
       </div>
-      {formDataList.map((formData, index) => (
-        <div
-          key={index}
-          style={{
-            backgroundColor: formData.color,
-            borderRadius: "5px",
-            padding: "10px",
-            marginBottom: "10px",
-          }}
-        >
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))",
+          gap: "10px",
+        }}
+      >
+        {formDataList.map((formData, index) => (
           <div
-            onClick={() => onEventClick(formData)}
-            style={{ fontSize: "14px", marginTop: "5px", cursor: "pointer" }}
+            key={index}
+            style={{
+              backgroundColor: formData.color,
+              borderRadius: "5px",
+              padding: "10px",
+            }}
           >
-            <strong style={{ fontSize: "18px" }}>{formData.title} </strong>
-            <span>{formData.days}: </span>
-            {formData.startTime} - {formData.endTime}
+            <div
+              onClick={() => onEventClick(formData)}
+              style={{ cursor: "pointer" }}
+            >
+              <strong>{formData.title} </strong>
+              <span>{formData.days}: </span>
+              {formData.startTime} - {formData.endTime}
+            </div>
           </div>
-        </div>
-      ))}
+        ))}
+      </div>
     </div>
   );
 };

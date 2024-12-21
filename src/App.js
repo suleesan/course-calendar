@@ -49,6 +49,19 @@ const quarters = [
 ];
 
 const App = () => {
+  useEffect(() => {
+    const queryParams = new URLSearchParams(window.location.search);
+    const encodedData = queryParams.get("data");
+    if (encodedData) {
+      try {
+        const parsedData = JSON.parse(decodeURIComponent(encodedData));
+        setDataByQuarter(parsedData);
+      } catch (error) {
+        console.error("Invalid calendar data in URL:", error);
+      }
+    }
+  }, []);
+
   const [dataByQuarter, setDataByQuarter] = useState(() => {
     const storedData = loadFromStorage("dataByQuarter");
     return Object.keys(storedData).length
@@ -178,7 +191,29 @@ const App = () => {
         transformOrigin: "top center",
       }}
     >
-      <h1>Course Scheduler</h1>
+      <div style={{ display: "flex", flexDirection: "row", gap: "20px" }}>
+        <h1>Course Calendar</h1>
+        <button
+          style={{
+            marginTop: "10px",
+            marginBottom: "10px",
+            backgroundColor: "#007bff",
+            color: "white",
+            border: "none",
+            borderRadius: "5px",
+          }}
+          onClick={() => {
+            const encodedData = encodeURIComponent(
+              JSON.stringify(dataByQuarter)
+            );
+            const shareableLink = `${window.location.origin}?data=${encodedData}`;
+            navigator.clipboard.writeText(shareableLink); // Copy to clipboard
+            alert("Link copied to clipboard!");
+          }}
+        >
+          Share Calendar
+        </button>
+      </div>
       <div className="quarter-selector">
         <button className="arrow-button" onClick={() => cycleQuarter("prev")}>
           ←

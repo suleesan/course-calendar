@@ -10,10 +10,10 @@ const daysOfWeek = [
   "Friday",
   "Saturday",
 ];
-const startHour = 9;
+const startHour = 7;
 const endHour = 22;
 
-const Calendar = ({ events, onUpdate }) => {
+const Calendar = ({ events }) => {
   const generateTimeSlots = () => {
     const slots = [];
     for (let hour = startHour; hour < endHour; hour++) {
@@ -27,7 +27,7 @@ const Calendar = ({ events, onUpdate }) => {
       <div
         style={{
           display: "grid",
-          gridTemplateColumns: "90px repeat(7, 1fr)",
+          gridTemplateColumns: "100px repeat(7, 1fr)",
         }}
       >
         <div style={{ border: "1px solid #ddd" }}>

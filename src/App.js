@@ -45,6 +45,12 @@ const quarters = [
   "Fall 2028-2029",
   "Winter 2028-2029",
   "Spring 2028-2029",
+  "Fall 2029-2030",
+  "Winter 2029-2030",
+  "Spring 2029-2030",
+  "Fall 2030-2031",
+  "Winter 2030-2031",
+  "Spring 2030-2031",
 ];
 
 const App = () => {

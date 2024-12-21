@@ -11,6 +11,11 @@ import ClassSchedule from "./ClassSchedule";
 import EventEditor from "./EventEditor";
 import Calendar from "./Calendar";
 import "./App.css";
+import {
+  getCalendar,
+  getOrCreateCalendarId,
+} from "./supabase/calendarFunctions";
+import { supabase } from "./supabase/supabase";
 
 const saveToStorage = (key, data) =>
   localStorage.setItem(key, JSON.stringify(data));
@@ -40,28 +45,39 @@ const quarters = [
   "Fall 2028-2029",
   "Winter 2028-2029",
   "Spring 2028-2029",
-  "Fall 2029-2030",
-  "Winter 2029-2030",
-  "Spring 2029-2030",
-  "Fall 2030-2031",
-  "Winter 2030-2031",
-  "Spring 2030-2031",
 ];
 
 const App = () => {
+  // load data from calendar id if opening link
   useEffect(() => {
     const queryParams = new URLSearchParams(window.location.search);
-    const encodedData = queryParams.get("data");
-    if (encodedData) {
-      try {
-        const parsedData = JSON.parse(decodeURIComponent(encodedData));
-        setDataByQuarter(parsedData);
-      } catch (error) {
-        console.error("Invalid calendar data in URL:", error);
-      }
+    const calendarId = queryParams.get("id");
+
+    if (calendarId) {
+      getCalendar(calendarId)
+        .then((data) => {
+          if (data) {
+            if (
+              typeof data === "object" &&
+              Object.keys(data).every((key) => quarters.includes(key))
+            ) {
+              setDataByQuarter(data);
+            } else {
+              console.error("Invalid calendar data structure:", data);
+              alert("Failed to load calendar. Data format is invalid.");
+            }
+          } else {
+            alert("Calendar not found!");
+          }
+        })
+        .catch((error) => {
+          console.error("Error loading calendar:", error);
+          alert("Failed to load calendar.");
+        });
     }
   }, []);
 
+  // else get data from local storage (clean link)
   const [dataByQuarter, setDataByQuarter] = useState(() => {
     const storedData = loadFromStorage("dataByQuarter");
     return Object.keys(storedData).length
@@ -114,7 +130,7 @@ const App = () => {
   const updateQuarterData = (updateFn) => {
     setDataByQuarter((prevData) => {
       const updatedQuarterData = updateFn(prevData[selectedQuarter]);
-      return { ...prevData, [selectedQuarter]: updatedQuarterData };
+      return { ...prevData, [selectedQuarter]: { ...updatedQuarterData } };
     });
   };
 
@@ -180,6 +196,32 @@ const App = () => {
     });
   };
 
+  async function shareCalendar() {
+    const calendarId = getOrCreateCalendarId();
+
+    try {
+      const sanitizedData = JSON.parse(JSON.stringify(dataByQuarter));
+
+      const { error } = await supabase.from("calendars").upsert(
+        {
+          calendar_id: calendarId,
+          data: sanitizedData,
+        },
+        { onConflict: "calendar_id" }
+      );
+
+      if (error) {
+        console.error("Error sharing calendar:", error);
+        return;
+      }
+
+      const shareableLink = `${window.location.origin}/?id=${calendarId}`;
+      alert(`Your calendar is shareable at this link: ${shareableLink}`);
+    } catch (err) {
+      console.error("Failed to share calendar:", err);
+    }
+  }
+
   return (
     <div
       style={{
@@ -193,26 +235,27 @@ const App = () => {
     >
       <div style={{ display: "flex", flexDirection: "row", gap: "20px" }}>
         <h1>Course Calendar</h1>
-        <button
+        <div
           style={{
-            marginTop: "10px",
-            marginBottom: "10px",
-            backgroundColor: "#007bff",
-            color: "white",
-            border: "none",
-            borderRadius: "5px",
-          }}
-          onClick={() => {
-            const encodedData = encodeURIComponent(
-              JSON.stringify(dataByQuarter)
-            );
-            const shareableLink = `${window.location.origin}?data=${encodedData}`;
-            navigator.clipboard.writeText(shareableLink); // Copy to clipboard
-            alert("Link copied to clipboard!");
+            position: "absolute",
+            top: "10px",
+            right: "10px",
           }}
         >
-          Share Calendar
-        </button>
+          <button
+            style={{
+              backgroundColor: "#007bff",
+              color: "white",
+              border: "none",
+              borderRadius: "5px",
+              padding: "10px 20px",
+              cursor: "pointer",
+            }}
+            onClick={shareCalendar}
+          >
+            Share Calendar
+          </button>
+        </div>
       </div>
       <div className="quarter-selector">
         <button className="arrow-button" onClick={() => cycleQuarter("prev")}>

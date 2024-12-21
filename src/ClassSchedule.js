@@ -4,11 +4,9 @@ import html2canvas from "html2canvas";
 
 const ClassSchedule = ({ formDataList, onEventClick }) => {
   const handleScreenshot = () => {
-    // Capture both schedule and calendar
     const scheduleElement = document.querySelector("#schedule-container");
     const calendarElement = document.querySelector("#calendar-container");
 
-    // Create a temporary container
     const container = document.createElement("div");
     container.style.position = "absolute";
     container.style.left = "-9999px";
@@ -17,13 +15,11 @@ const ClassSchedule = ({ formDataList, onEventClick }) => {
     document.body.appendChild(container);
 
     html2canvas(container).then((canvas) => {
-      // Create download link
       const link = document.createElement("a");
       link.download = "schedule-calendar.png";
       link.href = canvas.toDataURL();
       link.click();
 
-      // Cleanup
       document.body.removeChild(container);
     });
   };
@@ -82,12 +78,11 @@ const ClassSchedule = ({ formDataList, onEventClick }) => {
             borderRadius: "5px",
             padding: "10px",
             marginBottom: "10px",
-            color: "#fff",
           }}
         >
           <div
             onClick={() => onEventClick(formData)}
-            style={{ fontSize: "14px", marginTop: "5px" }}
+            style={{ fontSize: "14px", marginTop: "5px", cursor: "pointer" }}
           >
             <strong style={{ fontSize: "18px" }}>{formData.title} </strong>
             <span>{formData.days}: </span>

@@ -11,57 +11,30 @@ import ClassForm from "./CalendarInput";
 import ClassSchedule from "./ClassSchedule";
 import EventEditor from "./EventEditor";
 
+const saveToStorage = (key, data) =>
+  localStorage.setItem(key, JSON.stringify(data));
+const loadFromStorage = (key) => JSON.parse(localStorage.getItem(key)) || [];
+
+const dayMap = { M: 1, T: 2, W: 3, Th: 4, F: 5 };
+
 const App = () => {
   const [events, setEvents] = useState([]);
   const [formDataList, setFormDataList] = useState([]);
   const [selectedEvent, setSelectedEvent] = useState(null);
 
-  // Load events and raw form data from localStorage
   useEffect(() => {
-    const storedEvents = localStorage.getItem("events");
-    const storedFormDataList = localStorage.getItem("formDataList");
-
-    if (storedEvents) {
-      setEvents(JSON.parse(storedEvents));
-    }
-    if (storedFormDataList) {
-      setFormDataList(JSON.parse(storedFormDataList));
-    }
+    setEvents(loadFromStorage("events"));
+    setFormDataList(loadFromStorage("formDataList"));
   }, []);
 
-  // Day mapping
-  const dayMap = {
-    M: 1,
-    T: 2,
-    W: 3,
-    Th: 4,
-    F: 5,
-  };
-
-  // Add class
-  const addClass = ({ title, days, startTime, endTime, color }) => {
+  // Create events for a class (for the calendar)
+  const createEvent = ({ id, title, days, startTime, endTime, color }) => {
     const currentWeekStart = startOfWeek(new Date(), { weekStartsOn: 1 });
-
-    if (!Array.isArray(days) || days.length === 0) {
-      console.error("No days selected:", days);
-      return;
-    }
-
-    // for classSchedule.js
-    const newFormData = { title, days, startTime, endTime, color };
-    setFormDataList((prevList) => {
-      const updatedList = [...prevList, newFormData];
-      localStorage.setItem("formDataList", JSON.stringify(updatedList));
-      return updatedList;
-    });
-
-    // for calendar.js
-    const newEvents = days.map((day) => {
+    return days.map((day) => {
       const [startHours, startMinutes] = startTime.split(":").map(Number);
       const [endHours, endMinutes] = endTime.split(":").map(Number);
 
       const dayOffset = dayMap[day] - 1;
-
       const dayDate = addDays(currentWeekStart, dayOffset);
 
       const start = setMinutes(
@@ -70,58 +43,77 @@ const App = () => {
       );
       const end = setMinutes(setHours(new Date(dayDate), endHours), endMinutes);
 
-      // Calculate duration and height
-      const duration = differenceInMinutes(end, start);
-      const heightPerMinute = 40 / 60;
-      const eventHeight = duration * heightPerMinute;
-
       return {
-        id: Date.now() + Math.random(),
+        id,
         title,
-        start: start,
-        end: end,
+        start,
+        end,
         color,
-        height: `${eventHeight}px`,
+        height: `${differenceInMinutes(end, start) * (40 / 60)}px`,
         day: dayOffset,
       };
     });
+  };
 
-    setEvents((prevEvents) => {
-      const updatedEvents = [...prevEvents, ...newEvents];
-      localStorage.setItem("events", JSON.stringify(updatedEvents));
-      return updatedEvents;
+  // Add a new class
+  const addClass = (data) => {
+    if (!Array.isArray(data.days) || data.days.length === 0) {
+      console.error("No days selected:", data.days);
+      return;
+    }
+
+    const newEvents = createEvent(data);
+    setEvents((prev) => {
+      const updated = [...prev, ...newEvents];
+      saveToStorage("events", updated);
+      return updated;
+    });
+
+    setFormDataList((prev) => {
+      const updated = [...prev, data];
+      saveToStorage("formDataList", updated);
+      return updated;
     });
   };
 
-  const updateEvent = (updatedEvent) => {
-    // update events array for Calendar.js
-    const updatedEvents = events.map((event) =>
-      event.id === updatedEvent.id ? updatedEvent : event
-    );
+  // Update a class
+  const updateClass = ({ id, title, days, startTime, endTime, color }) => {
+    if (!Array.isArray(days)) {
+      days = days.split(",");
+    }
 
-    setEvents(updatedEvents);
-    localStorage.setItem("events", JSON.stringify(updatedEvents));
+    if (days.length === 0) {
+      console.error("You must have at least 1 day!");
+      return;
+    }
 
-    // update formDataList for ClassSchedule.js
+    const updatedFormData = { id, title, days, startTime, endTime, color };
     const updatedFormDataList = formDataList.map((formData) =>
-      formData.title === updatedEvent.title &&
-      formData.startTime === updatedEvent.startTime &&
-      formData.endTime === updatedEvent.endTime
-        ? { ...formData, ...updatedEvent }
-        : formData
+      formData.title === title ? updatedFormData : formData
     );
 
     setFormDataList(updatedFormDataList);
-    localStorage.setItem("formDataList", JSON.stringify(updatedFormDataList));
+    saveToStorage("formDataList", updatedFormDataList);
 
-    setSelectedEvent(null);
+    const newEvents = updatedFormDataList.flatMap(createEvent);
+    setEvents(newEvents);
+    saveToStorage("events", newEvents);
   };
 
-  // Delete an event
-  const deleteEvent = (eventId) => {
-    const updatedEvents = events.filter((event) => event.id !== eventId);
+  // Delete a class
+  const deleteClass = (title) => {
+    const updatedEvents = events.filter((event) => event.title !== title);
+
+    const updatedFormDataList = formDataList.filter(
+      (formData) => formData.title !== title
+    );
+
+    saveToStorage("events", updatedEvents);
+    saveToStorage("formDataList", updatedFormDataList);
+
     setEvents(updatedEvents);
-    localStorage.setItem("events", JSON.stringify(updatedEvents));
+    setFormDataList(updatedFormDataList);
+
     setSelectedEvent(null);
   };
 
@@ -147,8 +139,8 @@ const App = () => {
       {selectedEvent && (
         <EventEditor
           event={selectedEvent}
-          onUpdate={updateEvent}
-          onDelete={deleteEvent}
+          onUpdate={updateClass}
+          onDelete={() => deleteClass(selectedEvent.title)}
           onClose={() => setSelectedEvent(null)}
         />
       )}

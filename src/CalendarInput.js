@@ -1,7 +1,41 @@
 import React, { useState } from "react";
-import "./ClassInput.css";
+import "./CalendarInput.css";
 
 const ClassForm = ({ onAddClass }) => {
+  const colors = [
+    "#FFB3BA",
+    "#FFDFBA",
+    "#FFFFBA",
+    "#BAFFC9",
+    "#BAE1FF",
+    "#D4BAFF",
+    "#FFC2E2",
+    "#C2FFFF",
+    "#FF968A",
+    "#55CBCD",
+    "#FEE1E8",
+  ];
+
+  const ColorPalette = () => {
+    return (
+      <div>
+        <strong>Select Class Color:</strong>
+        <div className="color-palette">
+          {colors.map((color) => (
+            <div
+              key={color}
+              className={`color-swatch ${
+                formData.color === color ? "selected" : ""
+              }`}
+              style={{ backgroundColor: color }}
+              onClick={() => setFormData({ ...formData, color })}
+            />
+          ))}
+        </div>
+      </div>
+    );
+  };
+
   const [formData, setFormData] = useState({
     title: "",
     days: [],
@@ -36,6 +70,7 @@ const ClassForm = ({ onAddClass }) => {
     <form onSubmit={handleSubmit}>
       <div className="form-container">
         <div className="input-container">
+          <strong>Class Name: </strong>
           <input
             type="text"
             placeholder="Class Name"
@@ -47,7 +82,7 @@ const ClassForm = ({ onAddClass }) => {
             required
           />
           <div>
-            <strong>Select Days:</strong>
+            <strong style={{ marginRight: "10px" }}>Select Days:</strong>
             {["M", "T", "W", "Th", "F"].map((day) => (
               <label key={day}>
                 <input
@@ -79,28 +114,11 @@ const ClassForm = ({ onAddClass }) => {
               required
             />
           </div>
-          <div
-            style={{
-              display: "flex",
-              flexDirection: "row",
-              alignItems: "center",
-              gap: "10px",
-            }}
-          >
-            <strong>Class color:</strong>
-            <input
-              type="color"
-              value={formData.color}
-              onChange={(e) =>
-                setFormData({ ...formData, color: e.target.value })
-              }
-              className="color-picker"
-            />
-          </div>
+          <ColorPalette />
+          <button type="submit" className="submit-button">
+            Add Class
+          </button>
         </div>
-        <button type="submit" className="submit-button">
-          Add Class
-        </button>
       </div>
     </form>
   );

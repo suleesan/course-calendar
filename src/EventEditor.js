@@ -1,7 +1,21 @@
-import React, { useState } from "react";
-import "./EventEditor.css"; // Import CSS for styling
+import React, { useState, useEffect } from "react";
+import "./EventEditor.css";
 
 const EventEditor = ({ event, onUpdate, onDelete, onClose }) => {
+  const colors = [
+    "#FFB3BA",
+    "#FFDFBA",
+    "#FFFFBA",
+    "#BAFFC9",
+    "#BAE1FF",
+    "#D4BAFF",
+    "#FFC2E2",
+    "#C2FFFF",
+    "#FF968A",
+    "#55CBCD",
+    "#FEE1E8",
+  ];
+
   const [formData, setFormData] = useState({
     title: event.title,
     days: event.days,
@@ -10,19 +24,36 @@ const EventEditor = ({ event, onUpdate, onDelete, onClose }) => {
     color: event.color,
   });
 
+  useEffect(() => {
+    setFormData({
+      title: event.title,
+      days: event.days,
+      startTime: event.startTime,
+      endTime: event.endTime,
+      color: event.color,
+    });
+  }, [event]);
+
+  const handleColorSelect = (color) => {
+    setFormData((prevData) => ({ ...prevData, color }));
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
-    onUpdate({ ...event, ...formData }); // Pass updated event data
-    onClose(); // Close the modal
+    onUpdate({ ...event, ...formData });
+    onClose();
   };
 
   return (
     <div className="modal-overlay">
       <div className="modal-content">
         <h2>Edit Event</h2>
-        <form onSubmit={handleSubmit}>
-          <div>
-            <label>Title:</label>
+        <form
+          onSubmit={handleSubmit}
+          style={{ display: "flex", flexDirection: "column", gap: "20px" }}
+        >
+          <div className="content">
+            <strong>Title:</strong>
             <input
               type="text"
               value={formData.title}
@@ -32,17 +63,37 @@ const EventEditor = ({ event, onUpdate, onDelete, onClose }) => {
             />
           </div>
           <div>
-            <label>Color:</label>
-            <input
-              type="color"
-              value={formData.color}
-              onChange={(e) =>
-                setFormData({ ...formData, color: e.target.value })
-              }
-            />
+            <strong>Class Color:</strong>
+            <div className="color-palette">
+              {colors.map((color) => (
+                <div
+                  key={color}
+                  className={`color-swatch ${
+                    formData.color === color ? "selected" : ""
+                  }`}
+                  style={{ backgroundColor: color }}
+                  onClick={() => handleColorSelect(color)}
+                />
+              ))}
+            </div>
+
+            <div>
+              <strong>Custom color: </strong>
+              <input
+                type="color"
+                label="Custom"
+                value={formData.color}
+                onChange={(e) => handleColorSelect(e.target.value)}
+                style={{
+                  width: "50px",
+                  height: "50px",
+                  borderRadius: "50%",
+                }}
+              />
+            </div>
           </div>
-          <div>
-            <label>Days:</label>
+          <div className="content">
+            <strong>Days:</strong>
             <input
               type="text"
               value={formData.days}
@@ -51,8 +102,8 @@ const EventEditor = ({ event, onUpdate, onDelete, onClose }) => {
               }
             />
           </div>
-          <div>
-            <label>Start Time:</label>
+          <div className="content">
+            <strong>Start Time: </strong>
             <input
               type="time"
               value={formData.startTime}
@@ -61,8 +112,8 @@ const EventEditor = ({ event, onUpdate, onDelete, onClose }) => {
               }
             />
           </div>
-          <div>
-            <label>End Time:</label>
+          <div className="content">
+            <strong>End Time: </strong>
             <input
               type="time"
               value={formData.endTime}
@@ -75,7 +126,7 @@ const EventEditor = ({ event, onUpdate, onDelete, onClose }) => {
             <button type="submit">Update Event</button>
             <button
               type="button"
-              onClick={() => onDelete(event.id)}
+              onClick={() => onDelete(event.title)}
               style={{ marginLeft: "10px" }}
             >
               Delete Event

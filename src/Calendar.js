@@ -1,19 +1,19 @@
 import React from "react";
 import { format, setHours, setMinutes } from "date-fns";
 
-const Calendar = ({ events }) => {
-  const daysOfWeek = [
-    "Sunday",
-    "Monday",
-    "Tuesday",
-    "Wednesday",
-    "Thursday",
-    "Friday",
-    "Saturday",
-  ];
-  const startHour = 9;
-  const endHour = 21;
+const daysOfWeek = [
+  "Sunday",
+  "Monday",
+  "Tuesday",
+  "Wednesday",
+  "Thursday",
+  "Friday",
+  "Saturday",
+];
+const startHour = 9;
+const endHour = 22;
 
+const Calendar = ({ events, onUpdate }) => {
   const generateTimeSlots = () => {
     const slots = [];
     for (let hour = startHour; hour < endHour; hour++) {
@@ -51,7 +51,7 @@ const Calendar = ({ events }) => {
         </div>
         {daysOfWeek.map((day, dayIndex) => (
           <div key={day} style={{ border: "1px solid #ccc" }}>
-            <strong>{day}</strong>
+            <strong style={{ textAlign: "center" }}>{day}</strong>
             <div>
               {generateTimeSlots().map((_, index) => (
                 <div
@@ -70,28 +70,32 @@ const Calendar = ({ events }) => {
                         eventDay === dayIndex && eventHour === index + startHour
                       );
                     })
-                    .map((event) => (
-                      <div
-                        key={event.id}
-                        style={{
-                          backgroundColor: event.color,
-                          position: "absolute",
-                          top: 0,
-                          left: 0,
-                          right: 0,
-                          height: event.height,
-                          padding: "5px",
-                          boxSizing: "border-box",
-                          borderRadius: "5px",
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          zIndex: 1,
-                        }}
-                      >
-                        {event.title}
-                      </div>
-                    ))}
+                    .map((event) => {
+                      const eventMinute = new Date(event.start).getMinutes();
+                      const topPosition = (eventMinute / 60) * 40;
+                      return (
+                        <div
+                          key={event.id}
+                          style={{
+                            backgroundColor: event.color,
+                            position: "absolute",
+                            top: topPosition,
+                            left: 0,
+                            right: 0,
+                            height: event.height,
+                            padding: "5px",
+                            boxSizing: "border-box",
+                            borderRadius: "5px",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            zIndex: 1,
+                          }}
+                        >
+                          {event.title}
+                        </div>
+                      );
+                    })}
                 </div>
               ))}
             </div>

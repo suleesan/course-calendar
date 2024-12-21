@@ -46,7 +46,7 @@ const ShareCalendarButton = ({ dataByQuarter }) => {
     <div style={{ marginLeft: "10px" }}>
       <input
         type="text"
-        placeholder="Enter your name"
+        placeholder="Name"
         value={name}
         onChange={(e) => setName(e.target.value)}
         style={{

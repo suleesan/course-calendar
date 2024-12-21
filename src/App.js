@@ -22,22 +22,29 @@ const loadFromStorage = (key) => JSON.parse(localStorage.getItem(key)) || {};
 const dayMap = { M: 1, T: 2, W: 3, Th: 4, F: 5 };
 
 const App = () => {
-  // get calendar data from local storage
+  // add new quarters that i forgot (keep for future errors / quarter updates to avoid disrupting localStorage)
+  const initializeDataByQuarter = (storedData) => {
+    const initializedData = { ...storedData };
+
+    quarters.forEach((quarter) => {
+      if (!initializedData[quarter]) {
+        initializedData[quarter] = { events: [], formDataList: [] };
+      }
+    });
+
+    return initializedData;
+  };
+
+  // get quarter data from storage
   const [dataByQuarter, setDataByQuarter] = useState(() => {
     const storedData = loadFromStorage("dataByQuarter");
-    return Object.keys(storedData).length
-      ? storedData
-      : quarters.reduce((acc, quarter) => {
-          acc[quarter] = { events: [], formDataList: [] };
-          return acc;
-        }, {});
+    return initializeDataByQuarter(storedData);
   });
-
   const [selectedQuarterIndex, setSelectedQuarterIndex] = useState(7);
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [modalVisible, setModalVisible] = useState(false); // for quarter dropdown selection
   const [isSharedView, setIsSharedView] = useState(false); // for shared calendar
-  const [ownerName, setOwnerName] = useState(""); // Add state for owner name
+  const [ownerName, setOwnerName] = useState("");
 
   const selectedQuarter = quarters[selectedQuarterIndex];
   const currentQuarterData = dataByQuarter[selectedQuarter];

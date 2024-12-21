@@ -20,7 +20,7 @@ const ShareCalendarButton = ({ dataByQuarter }) => {
         {
           calendar_id: calendarId,
           data: sanitizedData,
-          name: name.trim(), // Store the owner's name
+          name: name.trim(),
         },
         { onConflict: "calendar_id" }
       );
@@ -54,6 +54,7 @@ const ShareCalendarButton = ({ dataByQuarter }) => {
           padding: "8px",
           borderRadius: "4px",
           border: "1px solid #ccc",
+          maxWidth: "80px",
         }}
       />
       <button

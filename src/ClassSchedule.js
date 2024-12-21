@@ -37,7 +37,7 @@ const ClassSchedule = ({
       >
         <div style={{ display: "flex", gap: "20px" }}>
           <header style={{ fontSize: "24px", fontWeight: "bold" }}>
-            Schedule ({totalUnits})
+            Classes ({totalUnits})
           </header>
           <button
             onClick={clearQuarter}
@@ -50,7 +50,7 @@ const ClassSchedule = ({
               cursor: "pointer",
             }}
           >
-            Clear Classes
+            Clear
           </button>
           {isSharedView ? (
             <button

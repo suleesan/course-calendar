@@ -91,7 +91,13 @@ const App = () => {
     const url = new URL(window.location.href);
     url.searchParams.delete("id");
     window.history.replaceState({}, document.title, url.toString());
-    window.location.reload(); // get back to user's own calendar
+
+    // Have to reset to user's own data
+    const storedData = loadFromStorage("dataByQuarter");
+    setDataByQuarter(initializeDataByQuarter(storedData));
+
+    setIsSharedView(false);
+    setOwnerName("");
   };
 
   const updateQuarterData = (updateFn) => {

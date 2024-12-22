@@ -116,7 +116,8 @@ const ClassForm = ({ onAddClass }) => {
             >
               <strong>Units: </strong>
               <input
-                type="text"
+                type="number"
+                min="0"
                 placeholder="Units"
                 value={formData.units}
                 className="input"

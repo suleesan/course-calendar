@@ -1,51 +1,32 @@
 import React, { useState, useEffect } from "react";
 import {
-  startOfWeek,
-  addDays,
-  setHours,
-  setMinutes,
-  differenceInMinutes,
-} from "date-fns";
-import ClassForm from "./CalendarInput";
-import ClassSchedule from "./ClassSchedule";
-import EventEditor from "./EventEditor";
-import Calendar from "./Calendar";
-import { quarters, QuarterSelector, QuarterModal } from "./Quarter";
+  saveToStorage,
+  loadFromStorage,
+  initializeDataByQuarter,
+  createEvent,
+} from "./utils/storage";
+import { quarters } from "./components/Quarter";
+import { useSharedCalendar } from "./hooks/useSharedCalendar";
+import { useQuarterNavigation } from "./hooks/useQuarterNavigation";
+import ClassForm from "./components/CalendarInput";
+import ClassSchedule from "./components/ClassSchedule";
+import EventEditor from "./components/EventEditor";
+import Calendar from "./components/Calendar";
+import { QuarterSelector, QuarterModal } from "./components/Quarter";
 import "./App.css";
-import { getCalendar } from "./supabase/calendarFunctions";
-
-const saveToStorage = (key, data) =>
-  localStorage.setItem(key, JSON.stringify(data));
-
-const loadFromStorage = (key) => JSON.parse(localStorage.getItem(key)) || {};
-
-const dayMap = { M: 1, T: 2, W: 3, Th: 4, F: 5 };
 
 const App = () => {
-  // add new quarters that i forgot (keep for future errors / quarter updates to avoid disrupting localStorage)
-  const initializeDataByQuarter = (storedData) => {
-    const initializedData = { ...storedData };
-
-    quarters.forEach((quarter) => {
-      if (!initializedData[quarter]) {
-        initializedData[quarter] = { events: [], formDataList: [] };
-      }
-    });
-
-    return initializedData;
-  };
-
-  // get quarter data from storage
   const [dataByQuarter, setDataByQuarter] = useState(() => {
     const storedData = loadFromStorage("dataByQuarter");
     return initializeDataByQuarter(storedData);
   });
-  const [selectedQuarterIndex, setSelectedQuarterIndex] = useState(10);
+
+  const [selectedQuarterIndex, cycleQuarter] = useQuarterNavigation();
   const [selectedEvent, setSelectedEvent] = useState(null);
-  const [modalVisible, setModalVisible] = useState(false); // for quarter dropdown selection
-  const [isSharedView, setIsSharedView] = useState(false); // for shared calendar
-  const [ownerName, setOwnerName] = useState("");
-  const [sharedDataByQuarter, setSharedDataByQuarter] = useState(null); // for shared calendar
+  const [modalVisible, setModalVisible] = useState(false);
+
+  const { isSharedView, sharedDataByQuarter, ownerName, clearSharedView } =
+    useSharedCalendar(setDataByQuarter);
 
   const selectedQuarter = quarters[selectedQuarterIndex];
   const currentQuarterData = isSharedView
@@ -57,55 +38,6 @@ const App = () => {
       saveToStorage("dataByQuarter", dataByQuarter);
     }
   }, [dataByQuarter, isSharedView]);
-
-  // get calendar from id if loading calendar from shared link
-  useEffect(() => {
-    const queryParams = new URLSearchParams(window.location.search);
-    const calendarId = queryParams.get("id");
-
-    if (calendarId) {
-      setIsSharedView(true);
-      getCalendar(calendarId)
-        .then((data) => {
-          if (data) {
-            if (
-              typeof data.data === "object" &&
-              Object.keys(data.data).every((key) => quarters.includes(key))
-            ) {
-              const initializedData = initializeDataByQuarter(data.data);
-              setSharedDataByQuarter(initializedData);
-              setOwnerName(data.name || "");
-            } else {
-              console.error("Invalid calendar data structure:", data);
-              alert("Failed to load calendar. Data format is invalid.");
-            }
-          } else {
-            alert("Calendar not found!");
-          }
-        })
-        .catch((error) => {
-          console.error("Error loading calendar:", error);
-          alert("Failed to load calendar.");
-        });
-    } else {
-      setIsSharedView(false);
-      setOwnerName("");
-    }
-  }, []);
-
-  const goToHome = () => {
-    const url = new URL(window.location.href);
-    url.searchParams.delete("id");
-    window.history.replaceState({}, document.title, url.toString());
-
-    // Reset to user's own data
-    const storedData = loadFromStorage("dataByQuarter");
-    setDataByQuarter(initializeDataByQuarter(storedData));
-
-    setSharedDataByQuarter(null); // Clear shared data
-    setIsSharedView(false);
-    setOwnerName("");
-  };
 
   const updateQuarterData = (updateFn) => {
     setDataByQuarter((prevData) => {
@@ -129,10 +61,6 @@ const App = () => {
   };
 
   const updateClass = (updatedData) => {
-    if (!Array.isArray(updatedData.days)) {
-      updatedData.days = updatedData.days.split(",");
-    }
-
     updateQuarterData((quarterData) => {
       const updatedFormDataList = quarterData.formDataList.map((formData) =>
         formData.id === updatedData.id ? updatedData : formData
@@ -159,47 +87,6 @@ const App = () => {
     setSelectedEvent(null);
   };
 
-  const createEvent = ({ id, title, days, startTime, endTime, color }) => {
-    const currentWeekStart = startOfWeek(new Date(), { weekStartsOn: 1 });
-    return days.map((day) => {
-      const [startHours, startMinutes] = startTime.split(":").map(Number);
-      const [endHours, endMinutes] = endTime.split(":").map(Number);
-
-      const dayOffset = dayMap[day] - 1;
-      const dayDate = addDays(currentWeekStart, dayOffset);
-
-      const start = setMinutes(
-        setHours(new Date(dayDate), startHours),
-        startMinutes
-      );
-      const end = setMinutes(setHours(new Date(dayDate), endHours), endMinutes);
-
-      return {
-        id,
-        title,
-        start,
-        end,
-        color,
-        height: `${differenceInMinutes(end, start) * (40 / 60)}px`,
-        day: dayOffset,
-      };
-    });
-  };
-
-  const clearQuarter = () => {
-    updateQuarterData(() => ({ events: [], formDataList: [] }));
-  };
-
-  const cycleQuarter = (direction) => {
-    setSelectedQuarterIndex((prevIndex) => {
-      if (direction === "prev")
-        return prevIndex === 0 ? quarters.length - 1 : prevIndex - 1;
-      if (direction === "next")
-        return prevIndex === quarters.length - 1 ? 0 : prevIndex + 1;
-      return prevIndex;
-    });
-  };
-
   return (
     <div className="container">
       <h1>
@@ -215,7 +102,7 @@ const App = () => {
         setModalVisible={setModalVisible}
         quarters={quarters}
         selectedQuarterIndex={selectedQuarterIndex}
-        setSelectedQuarterIndex={setSelectedQuarterIndex}
+        setSelectedQuarterIndex={(index) => cycleQuarter("set", index)}
       />
       <div className="interface">
         <div style={{ flex: 1.6 }}>
@@ -224,13 +111,13 @@ const App = () => {
         <div style={{ flex: 2 }}>
           <ClassSchedule
             formDataList={currentQuarterData.formDataList}
-            onEventClick={(event) => {
-              setSelectedEvent(event);
-            }}
-            clearQuarter={clearQuarter}
+            onEventClick={setSelectedEvent}
+            clearQuarter={() =>
+              updateQuarterData(() => ({ events: [], formDataList: [] }))
+            }
             dataByQuarter={dataByQuarter}
             isSharedView={isSharedView}
-            goToHome={goToHome}
+            goToHome={clearSharedView}
           />
         </div>
       </div>

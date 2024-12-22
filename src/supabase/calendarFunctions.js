@@ -12,7 +12,7 @@ export const getCalendar = async (calendarId) => {
     return null;
   }
 
-  return data; // Includes both `data` and `name`
+  return data;
 };
 
 export function getOrCreateCalendarId() {

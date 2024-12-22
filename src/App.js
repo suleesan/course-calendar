@@ -45,13 +45,18 @@ const App = () => {
   const [modalVisible, setModalVisible] = useState(false); // for quarter dropdown selection
   const [isSharedView, setIsSharedView] = useState(false); // for shared calendar
   const [ownerName, setOwnerName] = useState("");
+  const [sharedDataByQuarter, setSharedDataByQuarter] = useState(null); // for shared calendar
 
   const selectedQuarter = quarters[selectedQuarterIndex];
-  const currentQuarterData = dataByQuarter[selectedQuarter];
+  const currentQuarterData = isSharedView
+    ? sharedDataByQuarter?.[selectedQuarter] || { events: [], formDataList: [] }
+    : dataByQuarter[selectedQuarter];
 
   useEffect(() => {
-    saveToStorage("dataByQuarter", dataByQuarter);
-  }, [dataByQuarter]);
+    if (!isSharedView) {
+      saveToStorage("dataByQuarter", dataByQuarter);
+    }
+  }, [dataByQuarter, isSharedView]);
 
   // get calendar from id if loading calendar from shared link
   useEffect(() => {
@@ -67,7 +72,8 @@ const App = () => {
               typeof data.data === "object" &&
               Object.keys(data.data).every((key) => quarters.includes(key))
             ) {
-              setDataByQuarter(data.data);
+              const initializedData = initializeDataByQuarter(data.data);
+              setSharedDataByQuarter(initializedData);
               setOwnerName(data.name || "");
             } else {
               console.error("Invalid calendar data structure:", data);
@@ -92,10 +98,11 @@ const App = () => {
     url.searchParams.delete("id");
     window.history.replaceState({}, document.title, url.toString());
 
-    // Have to reset to user's own data
+    // Reset to user's own data
     const storedData = loadFromStorage("dataByQuarter");
     setDataByQuarter(initializeDataByQuarter(storedData));
 
+    setSharedDataByQuarter(null); // Clear shared data
     setIsSharedView(false);
     setOwnerName("");
   };

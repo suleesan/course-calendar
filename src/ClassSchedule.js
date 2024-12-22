@@ -37,7 +37,7 @@ const ClassSchedule = ({
       >
         <div style={{ display: "flex", gap: "20px" }}>
           <header style={{ fontSize: "24px", fontWeight: "bold" }}>
-            Classes ({totalUnits})
+            Schedule ({totalUnits})
           </header>
           <button
             onClick={clearQuarter}

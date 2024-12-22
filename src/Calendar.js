@@ -24,30 +24,47 @@ const Calendar = ({ events }) => {
 
   // for overlapping events
   const calculateEventStyles = (dayEvents) => {
-    const styledEvents = dayEvents.map((event, index) => {
-      const overlaps = dayEvents.filter(
-        (otherEvent) =>
-          event !== otherEvent &&
-          ((new Date(otherEvent.start) < new Date(event.end) &&
-            new Date(otherEvent.end) > new Date(event.start)) ||
-            (new Date(event.start) < new Date(otherEvent.end) &&
-              new Date(event.end) > new Date(otherEvent.start)))
+    const doEventsOverlap = (eventA, eventB) => {
+      return (
+        new Date(eventA.start) < new Date(eventB.end) &&
+        new Date(eventA.end) > new Date(eventB.start)
       );
+    };
 
-      const width =
-        overlaps.length > 0 ? `${100 / (overlaps.length + 1)}%` : "100%";
-      const left = `${
-        (index % (overlaps.length + 1)) * (100 / (overlaps.length + 1))
-      }%`;
+    const groups = [];
+    dayEvents.forEach((event) => {
+      let addedToGroup = false;
 
-      return {
-        ...event,
-        style: {
-          width,
-          left,
-          position: "absolute",
-        },
-      };
+      for (const group of groups) {
+        if (group.some((groupEvent) => doEventsOverlap(event, groupEvent))) {
+          group.push(event);
+          addedToGroup = true;
+          break;
+        }
+      }
+
+      if (!addedToGroup) {
+        groups.push([event]);
+      }
+    });
+
+    // Figure out styles for events
+    const styledEvents = [];
+    groups.forEach((group) => {
+      const groupSize = group.length;
+      group.forEach((event, index) => {
+        const width = `${100 / groupSize}%`;
+        const left = `${(index / groupSize) * 100}%`;
+
+        styledEvents.push({
+          ...event,
+          style: {
+            width,
+            left,
+            position: "absolute",
+          },
+        });
+      });
     });
 
     return styledEvents;

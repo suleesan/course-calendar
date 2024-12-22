@@ -40,7 +40,7 @@ const App = () => {
     const storedData = loadFromStorage("dataByQuarter");
     return initializeDataByQuarter(storedData);
   });
-  const [selectedQuarterIndex, setSelectedQuarterIndex] = useState(7);
+  const [selectedQuarterIndex, setSelectedQuarterIndex] = useState(10);
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [modalVisible, setModalVisible] = useState(false); // for quarter dropdown selection
   const [isSharedView, setIsSharedView] = useState(false); // for shared calendar

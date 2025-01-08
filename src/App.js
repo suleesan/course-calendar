@@ -14,6 +14,7 @@ import EventEditor from "./components/EventEditor";
 import Calendar from "./components/Calendar";
 import { QuarterSelector, QuarterModal } from "./components/Quarter";
 import "./App.css";
+import { FiHome } from "react-icons/fi";
 
 const App = () => {
   const [dataByQuarter, setDataByQuarter] = useState(() => {
@@ -92,6 +93,27 @@ const App = () => {
       <h1>
         {isSharedView && ownerName ? `${ownerName}'s ` : ""}Course Calendar
       </h1>
+      {isSharedView ? (
+        <div style={{ position: "fixed", top: "10px", left: "10px" }}>
+          <button
+            onClick={clearSharedView}
+            style={{
+              backgroundColor: "#007bff",
+              color: "white",
+              border: "none",
+              padding: "0px 10px",
+              borderRadius: "10px",
+              cursor: "pointer",
+              display: "flex",
+              alignItems: "center",
+            }}
+          >
+            <h3>Home</h3> <FiHome style={{ marginLeft: "5px" }} />
+          </button>
+        </div>
+      ) : (
+        <></>
+      )}
       <QuarterSelector
         selectedQuarter={selectedQuarter}
         onCycle={cycleQuarter}
@@ -105,10 +127,19 @@ const App = () => {
         setSelectedQuarterIndex={(index) => cycleQuarter("set", index)}
       />
       <div className="interface">
-        <div style={{ flex: 1.6 }}>
-          <ClassForm onAddClass={addClass} />
-        </div>
-        <div style={{ flex: 2 }}>
+        {isSharedView ? (
+          <></>
+        ) : (
+          <div style={{ flex: 1.6 }}>
+            <ClassForm onAddClass={addClass} />
+          </div>
+        )}
+        <div
+          style={{
+            flex: isSharedView ? undefined : 2,
+            width: isSharedView ? "50%" : undefined,
+          }}
+        >
           <ClassSchedule
             formDataList={currentQuarterData.formDataList}
             onEventClick={setSelectedEvent}

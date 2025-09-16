@@ -1,4 +1,4 @@
-import ShareCalendarButton from "./ShareCalendar";
+import ShareCalendar from "./ShareCalendar";
 import { FiEdit2 } from "react-icons/fi";
 
 const ClassSchedule = ({
@@ -57,7 +57,7 @@ const ClassSchedule = ({
           {isSharedView ? (
             <></>
           ) : (
-            <ShareCalendarButton dataByQuarter={dataByQuarter} />
+            <ShareCalendar dataByQuarter={dataByQuarter} />
           )}
         </div>
       </div>

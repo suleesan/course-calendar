@@ -1,5 +1,4 @@
-import React from "react";
-import ShareCalendarButton from "../ShareCalendar";
+import ShareCalendarButton from "./ShareCalendar";
 import { FiEdit2 } from "react-icons/fi";
 
 const ClassSchedule = ({

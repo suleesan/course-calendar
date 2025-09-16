@@ -20,18 +20,6 @@ export const quarters = [
   "Fall 2026-2027",
   "Winter 2026-2027",
   "Spring 2026-2027",
-  "Fall 2027-2028",
-  "Winter 2027-2028",
-  "Spring 2027-2028",
-  "Fall 2028-2029",
-  "Winter 2028-2029",
-  "Spring 2028-2029",
-  "Fall 2029-2030",
-  "Winter 2029-2030",
-  "Spring 2029-2030",
-  "Fall 2030-2031",
-  "Winter 2030-2031",
-  "Spring 2030-2031",
 ];
 
 // Quarter Selector

@@ -1,91 +1,57 @@
-import React, { useState, useEffect } from "react";
-import {
-  saveToStorage,
-  loadFromStorage,
-  initializeDataByQuarter,
-  createEvent,
-} from "./utils/storage";
+import React, { useState } from "react";
 import { quarters } from "./components/Quarter";
 import { useSharedCalendar } from "./hooks/useSharedCalendar";
 import { useQuarterNavigation } from "./hooks/useQuarterNavigation";
+import { useCalendar } from "./hooks/useCalendar";
 import ClassForm from "./components/CalendarInput";
 import ClassSchedule from "./components/ClassSchedule";
 import EventEditor from "./components/EventEditor";
 import Calendar from "./components/Calendar";
+import ShareCalendar from "./components/ShareCalendar";
 import { QuarterSelector, QuarterModal } from "./components/Quarter";
 import "./App.css";
 import { FiHome } from "react-icons/fi";
 
 const App = () => {
-  const [dataByQuarter, setDataByQuarter] = useState(() => {
-    const storedData = loadFromStorage("dataByQuarter");
-    return initializeDataByQuarter(storedData);
-  });
-
-  const [selectedQuarterIndex, cycleQuarter] = useQuarterNavigation();
-  const [selectedEvent, setSelectedEvent] = useState(null);
   const [modalVisible, setModalVisible] = useState(false);
+  const [selectedQuarterIndex, cycleQuarter] = useQuarterNavigation();
+
+  const {
+    dataByQuarter,
+    setDataByQuarter, // Get the setter from useCalendar
+    selectedEvent,
+    setSelectedEvent,
+    addClass,
+    updateClass,
+    deleteClass,
+    clearQuarter,
+    getCurrentQuarterData,
+  } = useCalendar();
 
   const { isSharedView, sharedDataByQuarter, ownerName, clearSharedView } =
-    useSharedCalendar(setDataByQuarter);
+    useSharedCalendar(setDataByQuarter); // Pass the setter
 
   const selectedQuarter = quarters[selectedQuarterIndex];
-  const currentQuarterData = isSharedView
-    ? sharedDataByQuarter?.[selectedQuarter] || { events: [], formDataList: [] }
-    : dataByQuarter[selectedQuarter];
+  const currentQuarterData = getCurrentQuarterData(
+    selectedQuarter,
+    sharedDataByQuarter,
+    isSharedView
+  );
 
-  useEffect(() => {
-    if (!isSharedView) {
-      saveToStorage("dataByQuarter", dataByQuarter);
-    }
-  }, [dataByQuarter, isSharedView]);
-
-  const updateQuarterData = (updateFn) => {
-    setDataByQuarter((prevData) => {
-      const updatedQuarterData = updateFn(prevData[selectedQuarter]);
-      return { ...prevData, [selectedQuarter]: { ...updatedQuarterData } };
-    });
+  const handleAddClass = (data) => {
+    addClass(data, selectedQuarter);
   };
 
-  const addClass = (data) => {
-    if (!Array.isArray(data.days) || data.days.length === 0) {
-      console.error("No days selected:", data.days);
-      return;
-    }
-
-    const newEvents = createEvent(data);
-    updateQuarterData((quarterData) => ({
-      ...quarterData,
-      events: [...quarterData.events, ...newEvents],
-      formDataList: [...quarterData.formDataList, data],
-    }));
+  const handleUpdateClass = (updatedData) => {
+    updateClass(updatedData, selectedQuarter);
   };
 
-  const updateClass = (updatedData) => {
-    updateQuarterData((quarterData) => {
-      const updatedFormDataList = quarterData.formDataList.map((formData) =>
-        formData.id === updatedData.id ? updatedData : formData
-      );
-
-      const updatedEvents = updatedFormDataList.flatMap(createEvent);
-
-      return {
-        ...quarterData,
-        formDataList: updatedFormDataList,
-        events: updatedEvents,
-      };
-    });
+  const handleDeleteClass = (title) => {
+    deleteClass(title, selectedQuarter);
   };
 
-  const deleteClass = (title) => {
-    updateQuarterData((quarterData) => ({
-      ...quarterData,
-      events: quarterData.events.filter((event) => event.title !== title),
-      formDataList: quarterData.formDataList.filter(
-        (formData) => formData.title !== title
-      ),
-    }));
-    setSelectedEvent(null);
+  const handleClearQuarter = () => {
+    clearQuarter(selectedQuarter);
   };
 
   return (
@@ -131,7 +97,7 @@ const App = () => {
           <></>
         ) : (
           <div style={{ flex: 1.6 }}>
-            <ClassForm onAddClass={addClass} />
+            <ClassForm onAddClass={handleAddClass} />
           </div>
         )}
         <div
@@ -143,9 +109,7 @@ const App = () => {
           <ClassSchedule
             formDataList={currentQuarterData.formDataList}
             onEventClick={setSelectedEvent}
-            clearQuarter={() =>
-              updateQuarterData(() => ({ events: [], formDataList: [] }))
-            }
+            clearQuarter={handleClearQuarter}
             dataByQuarter={dataByQuarter}
             isSharedView={isSharedView}
             goToHome={clearSharedView}
@@ -156,8 +120,8 @@ const App = () => {
       {selectedEvent && (
         <EventEditor
           event={selectedEvent}
-          onUpdate={updateClass}
-          onDelete={() => deleteClass(selectedEvent.title)}
+          onUpdate={handleUpdateClass}
+          onDelete={() => handleDeleteClass(selectedEvent.title)}
           onClose={() => setSelectedEvent(null)}
         />
       )}

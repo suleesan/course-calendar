@@ -1,8 +1,10 @@
 import React, { useState } from "react";
-import { supabase } from "./supabase/supabase";
-import { getOrCreateCalendarId } from "./supabase/calendarFunctions";
+import {
+  getOrCreateCalendarId,
+  autoSaveCalendar,
+} from "../supabase/calendarFunctions";
 
-const ShareCalendarButton = ({ dataByQuarter }) => {
+const ShareCalendar = ({ dataByQuarter }) => {
   const [name, setName] = useState("");
 
   const shareCalendar = async () => {
@@ -11,25 +13,16 @@ const ShareCalendarButton = ({ dataByQuarter }) => {
       return;
     }
 
-    const calendarId = getOrCreateCalendarId();
-
     try {
-      const sanitizedData = JSON.parse(JSON.stringify(dataByQuarter));
+      // Save calendar with the provided name
+      const success = await autoSaveCalendar(dataByQuarter, name.trim());
 
-      const { error } = await supabase.from("calendars").upsert(
-        {
-          calendar_id: calendarId,
-          data: sanitizedData,
-          name: name.trim(),
-        },
-        { onConflict: "calendar_id" }
-      );
-
-      if (error) {
-        console.error("Error sharing calendar:", error);
+      if (!success) {
+        alert("Failed to save calendar. Please try again.");
         return;
       }
 
+      const calendarId = getOrCreateCalendarId();
       const shareableLink = `${window.location.origin}/?id=${calendarId}`;
 
       // Copy link to clipboard
@@ -39,6 +32,7 @@ const ShareCalendarButton = ({ dataByQuarter }) => {
       );
     } catch (err) {
       console.error("Failed to share calendar:", err);
+      alert("Failed to share calendar. Please try again.");
     }
   };
 
@@ -68,10 +62,10 @@ const ShareCalendarButton = ({ dataByQuarter }) => {
         }}
         onClick={shareCalendar}
       >
-        Share Calendar
+        Save/Share Calendar
       </button>
     </div>
   );
 };
 
-export default ShareCalendarButton;
+export default ShareCalendar;

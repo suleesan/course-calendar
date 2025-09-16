@@ -2,7 +2,7 @@ import { useState } from "react";
 import { quarters } from "../components/Quarter";
 
 export const useQuarterNavigation = () => {
-  const [selectedQuarterIndex, setSelectedQuarterIndex] = useState(11);
+  const [selectedQuarterIndex, setSelectedQuarterIndex] = useState(12);
 
   const cycleQuarter = (direction, index = null) => {
     if (index !== null) {

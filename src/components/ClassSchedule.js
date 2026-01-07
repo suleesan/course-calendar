@@ -1,13 +1,4 @@
-import ShareCalendar from "./ShareCalendar";
-import { FiEdit2 } from "react-icons/fi";
-
-const ClassSchedule = ({
-  formDataList,
-  onEventClick,
-  clearQuarter,
-  dataByQuarter,
-  isSharedView,
-}) => {
+const ClassSchedule = ({ formDataList }) => {
   const formatTo12Hour = (time) => {
     const [hours, minutes] = time.split(":").map(Number);
     const ampm = hours >= 12 ? "PM" : "AM";
@@ -33,39 +24,15 @@ const ClassSchedule = ({
           marginBottom: "20px",
         }}
       >
-        <div style={{ display: "flex", gap: "20px" }}>
-          <header style={{ fontSize: "24px", fontWeight: "bold" }}>
-            Schedule ({totalUnits})
-          </header>
-          {isSharedView ? (
-            <></>
-          ) : (
-            <button
-              onClick={clearQuarter}
-              style={{
-                backgroundColor: "#dc3545",
-                color: "white",
-                border: "none",
-                padding: "8px 16px",
-                borderRadius: "4px",
-                cursor: "pointer",
-              }}
-            >
-              Clear
-            </button>
-          )}
-          {isSharedView ? (
-            <></>
-          ) : (
-            <ShareCalendar dataByQuarter={dataByQuarter} />
-          )}
-        </div>
+        <header style={{ fontSize: "24px", fontWeight: "bold" }}>
+          Schedule ({totalUnits})
+        </header>
       </div>
       <div
         style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))",
+          display: "flex",
           gap: "10px",
+          flexWrap: "wrap",
         }}
       >
         {formDataList.map((formData, index) => {
@@ -81,15 +48,7 @@ const ClassSchedule = ({
                 padding: "12px 24px 12px 12px",
               }}
             >
-              <div
-                onClick={
-                  isSharedView ? undefined : () => onEventClick(formData)
-                }
-                style={{
-                  cursor: isSharedView ? "default" : "pointer",
-                  position: "relative",
-                }}
-              >
+              <div>
                 <strong>
                   {formData.title} ({formData.units}){" "}
                 </strong>
@@ -98,17 +57,6 @@ const ClassSchedule = ({
                 {start.ampm === end.ampm
                   ? `- ${end.formattedTime} ${end.ampm}`
                   : `${start.ampm} - ${end.formattedTime} ${end.ampm}`}
-                {isSharedView ? (
-                  <></>
-                ) : (
-                  <FiEdit2
-                    style={{
-                      position: "absolute",
-                      top: "-8px",
-                      right: "-20px",
-                    }}
-                  />
-                )}
               </div>
             </div>
           );

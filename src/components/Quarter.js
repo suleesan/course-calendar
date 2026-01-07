@@ -1,26 +1,22 @@
 import React from "react";
 import "./Quarter.css";
+import { coursesByQuarter } from "../courseData";
 
-export const quarters = [
-  "Fall 2021-2022",
-  "Winter 2021-2022",
-  "Spring 2021-2022",
-  "Fall 2022-2023",
-  "Winter 2022-2023",
-  "Spring 2022-2023",
-  "Fall 2023-2024",
-  "Winter 2023-2024",
-  "Spring 2023-2024",
-  "Fall 2024-2025",
-  "Winter 2024-2025",
-  "Spring 2024-2025",
-  "Fall 2025-2026",
-  "Winter 2025-2026",
-  "Spring 2025-2026",
-  "Fall 2026-2027",
-  "Winter 2026-2027",
-  "Spring 2026-2027",
-];
+const termOrder = { Fall: 0, Winter: 1, Spring: 2 };
+const parseQuarter = (quarter) => {
+  const [term, yearRange] = quarter.split(" ");
+  const [startYear] = (yearRange || "").split("-").map(Number);
+  return { termIndex: termOrder[term] ?? 99, startYear: startYear || 0 };
+};
+
+export const quarters = Object.keys(coursesByQuarter).sort((a, b) => {
+  const first = parseQuarter(a);
+  const second = parseQuarter(b);
+  if (first.startYear !== second.startYear) {
+    return first.startYear - second.startYear;
+  }
+  return first.termIndex - second.termIndex;
+});
 
 // Quarter Selector
 export const QuarterSelector = ({ selectedQuarter, onCycle, onOpenModal }) => (

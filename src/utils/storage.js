@@ -7,14 +7,6 @@ import {
 } from "date-fns";
 import { quarters } from "../components/Quarter";
 
-export const saveToStorage = (key, data) => {
-  localStorage.setItem(key, JSON.stringify(data));
-};
-
-export const loadFromStorage = (key) => {
-  return JSON.parse(localStorage.getItem(key)) || {};
-};
-
 export const initializeDataByQuarter = (storedData) => {
   const initializedData = { ...storedData };
 

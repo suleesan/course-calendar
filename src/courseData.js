@@ -472,8 +472,8 @@ export const coursesByQuarter = {
     {
       title: "music 179z",
       days: ["W"],
-      startTime: "10:00",
-      endTime: "11:00",
+      startTime: "14:00",
+      endTime: "15:00",
       color: "#BAFFC9",
       units: "1",
       id: 1756879452809,
